@@ -2,6 +2,8 @@ package com.bwie.pddapp.data;
 
 import com.google.gson.Gson;
 
+import java.util.List;
+
 /**
  * Created by liqy on 2017/12/11.
  */
@@ -22,10 +24,16 @@ public class Goods {
     public String hd_thumb_url;
     public int quantity;
     public boolean is_onsale;
-    public int goods_id;
+    public long goods_id;
     public int is_app;
     public int mall_id;
     public int region_limit;
+
+    public AvatarList avatarLists;
+
+    public String getGoodsId() {
+        return goods_id+"";
+    }
 
     @Override
     public String toString() {
@@ -48,6 +56,7 @@ public class Goods {
                 ", is_app=" + is_app +
                 ", mall_id=" + mall_id +
                 ", region_limit=" + region_limit +
+                ", avatarLists=" + avatarLists +
                 '}';
     }
 }
