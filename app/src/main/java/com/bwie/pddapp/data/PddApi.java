@@ -9,6 +9,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.Url;
 
 /**
  * Created by liqy on 2017/12/11.
@@ -16,10 +17,20 @@ import retrofit2.http.POST;
 
 public interface PddApi {
 
-    @GET(Urls.HNEW_LIST)
-    Flowable<ResponseData<ArrayList<Goods>>> list();
+    /**
+     * 动态URL
+     * @param url
+     * @return
+     */
+    @GET
+    Flowable<ResponseData<ArrayList<Goods>>> list(@Url String url);
 
     @POST("goods/local_groups")
     Flowable<JsonObject> local_groups(@Body RequestParams params);
+
+    @GET("avatars_subjects")
+    Flowable<ResponseData<ArrayList<Goods>>> avatars_subjects();
+
+
 
 }

@@ -23,7 +23,7 @@ public class Goods {
     public String goods_name;
     public String hd_thumb_url;
     public int quantity;
-    public boolean is_onsale;
+//    public boolean is_onsale;
     public long goods_id;
     public int is_app;
     public int mall_id;
@@ -51,7 +51,7 @@ public class Goods {
                 ", goods_name='" + goods_name + '\'' +
                 ", hd_thumb_url='" + hd_thumb_url + '\'' +
                 ", quantity=" + quantity +
-                ", is_onsale=" + is_onsale +
+//                ", is_onsale=" + is_onsale +
                 ", goods_id=" + goods_id +
                 ", is_app=" + is_app +
                 ", mall_id=" + mall_id +

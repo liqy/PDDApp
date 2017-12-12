@@ -9,11 +9,12 @@ import android.util.Log;
 import com.bwie.pddapp.data.AvatarList;
 import com.bwie.pddapp.data.Goods;
 import com.bwie.pddapp.data.GoodsAdapter;
+import com.bwie.pddapp.data.NewsList;
 import com.bwie.pddapp.data.PddApi;
 import com.bwie.pddapp.data.RequestParams;
 import com.bwie.pddapp.data.ResponseData;
+import com.bwie.pddapp.data.RetrofitHelper;
 import com.bwie.pddapp.data.RxSchedulers;
-import com.bwie.pddapp.data.SignInterceptor;
 import com.bwie.pddapp.data.Urls;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -33,11 +34,6 @@ import io.reactivex.FlowableOnSubscribe;
 import io.reactivex.FlowableTransformer;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -47,25 +43,64 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        initView();
+        getData2();
+    }
 
-        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+    private void getData2() {
 
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(logging)
-                .addInterceptor(new SignInterceptor())
-                .build();
+        final PddApi api = RetrofitHelper.getAPI();
 
-        final Retrofit retrofit = new Retrofit.Builder()
-                .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .client(client)
-                .baseUrl(Urls.HOST_V3)
-                .build();
+        Flowable<ArrayList<NewsList>> head = api.avatars_subjects()
+                .map(new Function<ResponseData<ArrayList<Goods>>, ArrayList<NewsList>>() {
+                    @Override
+                    public ArrayList<NewsList> apply(ResponseData<ArrayList<Goods>> data) throws Exception {
+                        ArrayList<NewsList> list = new ArrayList<>();
 
-        final PddApi api = retrofit.create(PddApi.class);
+                        if (data.avatars != null)
+                            list.add(new NewsList(NewsList.HEAD, data.avatars));
 
-        api.list()
+                        if (data.goods_list != null)
+                            list.add(new NewsList(NewsList.HEAD, data.goods_list));
+
+                        return list;
+                    }
+                });
+
+        final Flowable<ArrayList<NewsList>> flowList = api.list(Urls.HNEW_LIST)
+                .map(new Function<ResponseData<ArrayList<Goods>>, ArrayList<NewsList>>() {
+                    @Override
+                    public ArrayList<NewsList> apply(ResponseData<ArrayList<Goods>> data) throws Exception {
+                        ArrayList<NewsList> list = new ArrayList<>();
+                        if (data.goods_list!=null){
+                            ArrayList<Goods> goodsList=data.goods_list;
+                            for (Goods g : goodsList) {
+                                list.add(new NewsList(NewsList.ITEM,g));
+                            }
+                        }
+                        return list;
+                    }
+                });
+
+
+        Flowable.concat(head, flowList)
+                .compose(RxSchedulers.<ArrayList<NewsList>>io_main())
+                .subscribe(new Consumer<ArrayList<NewsList>>() {
+                    @Override
+                    public void accept(ArrayList<NewsList> newsLists) throws Exception {
+                        Log.d(getLocalClassName(),newsLists.toString());
+                        GoodsAdapter adapter = new GoodsAdapter(MainActivity.this, newsLists);
+                        recycler.setAdapter(adapter);
+                    }
+                });
+
+
+    }
+
+    private void getData1() {
+        final PddApi api = RetrofitHelper.getAPI();
+
+        api.list(Urls.HNEW_LIST)
                 .compose(RxSchedulers.<ResponseData<ArrayList<Goods>>>io_main())
                 .compose(this.<ArrayList<Goods>>handleResult())
                 .subscribe(new Consumer<ArrayList<Goods>>() {
@@ -106,15 +141,17 @@ public class MainActivity extends AppCompatActivity {
                                     public void accept(ArrayList<Goods> goods) throws Exception {
                                         Log.d(getLocalClassName(), goods.toString());
 
-                                        GoodsAdapter adapter=new GoodsAdapter(goods);
-
-                                        recycler.setAdapter(adapter);
                                     }
                                 });
                     }
                 });
+    }
 
 
+    /**
+     * 初始化界面
+     */
+    private void initView() {
         //初始化界面
         GridLayoutManager manager = new GridLayoutManager(this, 6);
 
@@ -133,10 +170,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        recycler=(RecyclerView)findViewById(R.id.recycler);
+        recycler = (RecyclerView) findViewById(R.id.recycler);
         recycler.setLayoutManager(manager);
-
-
 
     }
 
