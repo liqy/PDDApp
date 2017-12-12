@@ -28,6 +28,10 @@ public class NewsList {
                 '}';
     }
 
+    public NewsList(int type) {
+        this.type = type;
+    }
+
     public NewsList(int type, Goods goods) {
         this.type = type;
         this.goods = goods;

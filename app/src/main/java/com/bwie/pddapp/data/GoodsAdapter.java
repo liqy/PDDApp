@@ -22,7 +22,6 @@ import java.util.List;
 public class GoodsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
 
-
     private int windowsHeight;
     private int windowsWight;
 
@@ -31,8 +30,16 @@ public class GoodsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     List<NewsList> list;
 
-    public GoodsAdapter(Activity context, List<NewsList> list) {
-        this.list = list;
+    public void setDataList(List<NewsList> list) {
+        int positionStart = this.list.size();
+        this.list.addAll(list);
+        int itemCount = list.size();
+        notifyItemRangeChanged(positionStart, itemCount);
+
+    }
+
+    public GoodsAdapter(Activity context) {
+        this.list = new ArrayList<>();
         //获取屏幕高宽
         DisplayMetrics metric = new DisplayMetrics();
         context.getWindowManager().getDefaultDisplay().getMetrics(metric);
@@ -80,14 +87,14 @@ public class GoodsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         NewsList newsList = list.get(position);
 
         if (holder instanceof GoodsViewHolder) {
-            Goods goods=newsList.goods;
+            Goods goods = newsList.goods;
             GoodsViewHolder goodsViewHolder = (GoodsViewHolder) holder;
             goodsViewHolder.textView.setText(goods.goods_name);
             goodsViewHolder.imageView.setImageURI(goods.hd_thumb_url);
 
-            if (goods.avatarLists!=null){
+            if (goods.avatarLists != null) {
 
-                ArrayList<String> list=new ArrayList<>();
+                ArrayList<String> list = new ArrayList<>();
                 for (GroupAvatar groupAvatar : goods.avatarLists.list) {
                     list.add(groupAvatar.avatar);
                 }

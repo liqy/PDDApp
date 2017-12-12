@@ -38,6 +38,7 @@ import io.reactivex.functions.Function;
 public class MainActivity extends AppCompatActivity {
 
     RecyclerView recycler;
+    GoodsAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +64,9 @@ public class MainActivity extends AppCompatActivity {
                         if (data.goods_list != null)
                             list.add(new NewsList(NewsList.HEAD, data.goods_list));
 
+
+                        list.add(new NewsList(NewsList.LABEL));
+
                         return list;
                     }
                 });
@@ -72,10 +76,10 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public ArrayList<NewsList> apply(ResponseData<ArrayList<Goods>> data) throws Exception {
                         ArrayList<NewsList> list = new ArrayList<>();
-                        if (data.goods_list!=null){
-                            ArrayList<Goods> goodsList=data.goods_list;
+                        if (data.goods_list != null) {
+                            ArrayList<Goods> goodsList = data.goods_list;
                             for (Goods g : goodsList) {
-                                list.add(new NewsList(NewsList.ITEM,g));
+                                list.add(new NewsList(NewsList.ITEM, g));
                             }
                         }
                         return list;
@@ -88,9 +92,9 @@ public class MainActivity extends AppCompatActivity {
                 .subscribe(new Consumer<ArrayList<NewsList>>() {
                     @Override
                     public void accept(ArrayList<NewsList> newsLists) throws Exception {
-                        Log.d(getLocalClassName(),newsLists.toString());
-                        GoodsAdapter adapter = new GoodsAdapter(MainActivity.this, newsLists);
-                        recycler.setAdapter(adapter);
+                        Log.d(getLocalClassName(), newsLists.toString());
+                        adapter.setDataList(newsLists);
+
                     }
                 });
 
@@ -172,6 +176,9 @@ public class MainActivity extends AppCompatActivity {
 
         recycler = (RecyclerView) findViewById(R.id.recycler);
         recycler.setLayoutManager(manager);
+
+        adapter = new GoodsAdapter(MainActivity.this);
+        recycler.setAdapter(adapter);
 
     }
 
